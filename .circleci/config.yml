@@ -284,7 +284,7 @@ jobs:
   release_jazzydoc:
     # Specify the Xcode version to use
     macos:
-      xcode: "10.1.0"
+      xcode: "10.2.0"
     steps:
       - checkout  
       - run:
@@ -302,13 +302,13 @@ jobs:
             git config --local user.name "AWS"
             git checkout  gh-pages
             mkdir -p docs/reference/AWSMobileClient     
-            cp -R docs/api/* docs/reference/AWSMobileClient               
-      - run:
-          name: checkin jazzy documents
-          command: |
-            git add docs/reference/AWSMobileClient
-            git commit -m "Update jazzy documentation for ${CIRCLE_TAG}"
-            git push -q https://${GITHUB_TOKEN}@github.com/aws/aws-sdk-ios.git  
+            cp -R docs/api/* docs/reference/AWSMobileClient                 
+      # - run:
+      #     name: checkin jazzy documents
+      #     command: |
+      #       git add docs/reference/AWSMobileClient
+      #       git commit -m "Update jazzy documentation for ${CIRCLE_TAG}"
+      #       git push -q https://${GITHUB_TOKEN}@github.com/aws/aws-sdk-ios.git  
 
   run_ui_test:
     # Specify the Xcode version to use
@@ -421,32 +421,33 @@ workflows:
 
   build_and_test:
     jobs: 
-      - build:
-          filters:
-            branches:
-              ignore: /gh-.*/
-      - unittest:
-          requires:
-            - build
-          filters:
-            branches:
-              ignore: /gh-.*/
-      - integrationtest:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-                - master
-                - develop
-      - run_ui_test:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-                - master
-                - develop
+      - release_jazzydoc
+      # - build:
+      #     filters:
+      #       branches:
+      #         ignore: /gh-.*/
+      # - unittest:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         ignore: /gh-.*/
+      # - integrationtest:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
+      #           - develop
+      # - run_ui_test:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
+      #           - develop
   release_sdk:
     jobs: 
       - build:
