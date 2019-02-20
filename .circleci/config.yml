@@ -287,28 +287,48 @@ jobs:
       xcode: "10.1.0"
     steps:
       - checkout  
+      - update_brew
+      - run:
+          name: prepare for installing jazzy
+          command: |
+            echo "update sqllite"
+            brew install sqlite3
+            # export GEM_HOME="$HOME/.gem"
+            # echo "update system"
+            # sudo gem update --system
+            # echo "ruby version"
+            # ruby -v
+            # echo "install ruby"
+            # brew upgrade ruby    
+            # brew link --overwrite ruby                   
       - run:
           name: Install jazzy
           command: |
-            sudo gem install jazzy --source http://rubygems.org
-      - run:
-          name: generate jazzy documents
-          command: |
-            currentversion=${CIRCLE_TAG}
-            bash ./Scripts/AWSMobileClientAPIReference.sh $currentversion
-      - run:
-          name: copy jazzy documents
-          command: |
-            git config --local user.name "AWS"
-            git checkout  gh-pages
-            mkdir -p docs/reference/AWSMobileClient     
-            cp -R docs/api/* docs/reference/AWSMobileClient               
-      - run:
-          name: checkin jazzy documents
-          command: |
-            git add docs/reference/AWSMobileClient
-            git commit -m "Update jazzy documentation for ${CIRCLE_TAG}"
-            git push -q https://${GITHUB_TOKEN}@github.com/aws/aws-sdk-ios.git  
+            export GEM_HOME="$HOME/.gem"
+            echo "ruby version"
+            ruby -v   
+            echo "install jazzy"     
+            sudo gem install jazzy
+
+      # --source http://rubygems.org
+      # - run:
+      #     name: generate jazzy documents
+      #     command: |
+      #       currentversion=${CIRCLE_TAG}
+      #       bash ./Scripts/AWSMobileClientAPIReference.sh $currentversion
+      # - run:
+      #     name: copy jazzy documents
+      #     command: |
+      #       git config --local user.name "AWS"
+      #       git checkout  gh-pages
+      #       mkdir -p docs/reference/AWSMobileClient     
+      #       cp -R docs/api/* docs/reference/AWSMobileClient               
+      # - run:
+      #     name: checkin jazzy documents
+      #     command: |
+      #       git add docs/reference/AWSMobileClient
+      #       git commit -m "Update jazzy documentation for ${CIRCLE_TAG}"
+      #       git push -q https://${GITHUB_TOKEN}@github.com/aws/aws-sdk-ios.git  
 
   run_ui_test:
     # Specify the Xcode version to use
@@ -421,32 +441,33 @@ workflows:
 
   build_and_test:
     jobs: 
-      - build:
-          filters:
-            branches:
-              ignore: /gh-.*/
-      - unittest:
-          requires:
-            - build
-          filters:
-            branches:
-              ignore: /gh-.*/
-      - integrationtest:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-                - master
-                - develop
-      - run_ui_test:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-                - master
-                - develop
+      - release_jazzydoc
+      # - build:
+      #     filters:
+      #       branches:
+      #         ignore: /gh-.*/
+      # - unittest:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         ignore: /gh-.*/
+      # - integrationtest:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
+      #           - develop
+      # - run_ui_test:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
+      #           - develop
   release_sdk:
     jobs: 
       - build:
